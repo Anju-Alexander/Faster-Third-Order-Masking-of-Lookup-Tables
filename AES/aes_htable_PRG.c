@@ -35,10 +35,10 @@ void refresh_mask_sni(byte y_cw[4])
 {
    byte t[4];
    gen_rand(t,4);
-   y_cw[0]=(t[0]^y_cw[0])^t[1];
-   y_cw[1]=(t[1]^y_cw[1])^t[2];
-   y_cw[2]=(t[2]^y_cw[2])^t[3];
-   y_cw[3]=(t[3]^y_cw[3])^t[0];
+   y_cw[0]=(y_cw[0]^t[0])^t[3];
+   y_cw[1]=(y_cw[1]^t[1])^t[0];
+   y_cw[2]=(y_cw[2]^t[2])^t[1];
+   y_cw[3]=(y_cw[3]^t[3])^t[2];
  
 }
 
@@ -53,20 +53,7 @@ void refresh_mask_byte_LR(byte y_cw[4])
 
 }
 
-void fullrefresh_sni(byte a[shares_N])
-{
-  int i,j,n=shares_N;
-  byte tmp[1];
-  for(i=0;i<n;i++)
-  {
-  for(j=i+1;j<n;j++)
-  {
-    gen_rand(tmp,1); //rand();
-    a[i]=a[i] ^ tmp[0];
-    a[j]=a[j] ^ tmp[0];
-  }
-  }
-}
+
 
 void refresh_mask_byte(int ct,byte y_cw[4])
 { 
@@ -144,12 +131,10 @@ void subbyte_htable_third(byte y[shares_N], int n, int ind, int choice)
 	    y[n - 1] = Y3[t2 + x4];
 	}
 	
-   #if SNI_RM==0
+
    refresh_mask_sni(y);
-   #endif
-   #if SNI_RM==1
-   fullrefresh_sni(y);
-   #endif
+   
+   
     
 }
 
@@ -421,4 +406,3 @@ void gen_t_for_all_higher_increasing_shares(int n, int choice, double tim[1])
 	}   
 
 }
-

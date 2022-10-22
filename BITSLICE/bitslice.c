@@ -1041,6 +1041,7 @@ int run_aes_share_bitslice(byte in[16],byte out[16],byte key[16],int nt){
   //byte w[176];
   //byte wshare[176][shares_N]; // for key bitslice representation should contain [3][176] input and [88][3] output
   //unsigned int wshare_bs[88][shares_N];
+  keyexpansion(key,w);
   for(i=0;i<176;i++)
   {
     //wshare[i]=(byte *) malloc(n*sizeof(byte));

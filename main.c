@@ -17,11 +17,9 @@ int main()
 
     int nt = 10; //Number of times to repeat experiments
     int shares = shares_N; // #Input shares. Set the parameter in common.h.
-    int cipher = AES_THIRD; //Cipher can be AES_THIRD or PRESENT_THIRD or BITSLICE or AES_HIGHER_ORDER_INCREASING_SHARES
+    int cipher = AES_RP; //Cipher can be AES_THIRD, PRESENT_THIRD, AES_RP, BITSLICE or AES_HIGHER_ORDER_INCREASING_SHARES
     int type=BASIC; //for AES_THIRD type can be BASIC, for PRESENT_THIRD type can be BASIC,  AES_HO_I_S it can be BASIC or LRV
    
-	// SNI_RM is setting for AES_THIRD or PRESENT_THIRD. set value to 1 for using SNI full refresh scheme. Set 0 for Third order specific SNI refresh mask.
-	 //SNI_RM can be set in common.h
     double time[11]={0,0,0,0,0,0,0,0,0,0,0};// To hold offline and online execution clock cycle count
     double time_b[1]={0};
     int i,k,al;
@@ -67,10 +65,13 @@ int main()
 		{
 			if(cipher ==AES_THIRD)
 			printf("Successful execution of LUT-based AES using customized third order scheme \n");
+
 			else if(cipher ==AES_HIGHER_ORDER_INCREASING_SHARES && type ==BASIC)
 			printf("Successful execution of LUT-based AES using increasing shares higher order scheme \n");
+
 			else if(cipher ==AES_HIGHER_ORDER_INCREASING_SHARES && type ==LRV)
 			printf("Successful execution of LUT-based AES using increasing shares higher order scheme using LRV\n");
+
 		    printf("Offline timings:%f \n",time[0]);
 			printf("Online timings:%f \n",time[1]/nt);   
 		}
@@ -154,6 +155,81 @@ int main()
 		
 		}
 		
+	}
+	if(cipher==AES_RP)
+	{
+		volatile double time_b[1]={0};
+		byte n=4,l=1; //Second-order, n=3.
+		/****************Test vectors********************/
+		volatile unsigned int begin1=0, end1=0;
+		double time_spent=0.0;
+		byte keyex[16]={0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c};
+		byte inex[16]={0x32,0x43,0xf6,0xa8,0x88,0x5a,0x30,0x8d,0x31,0x31,0x98,0xa2,0xe0,0x37,0x07,0x34};
+		byte outex[16]={0x39,0x25,0x84,0x1d,0x02,0xdc,0x09,0xfb,0xdc,0x11,0x85,0x97,0x19,0x6a,0x0b,0x32};
+
+		byte in1[16], in2[16], out1[16], out2[16];
+	
+		byte key1[16], key2[16];
+		for (i = 0; i < 16; i++)
+			{
+				key1[i] = keyex[i];
+				key2[i] = keyex[i];
+			}
+			
+			for (i = 0; i < 16; i++)
+			{
+			in1[i] = inex[i];
+			in2[i] = inex[i];
+
+		}
+		for (k = 0; k < 16; k++)
+		{
+			out1[k] = 0x0;
+		}
+		byte in[16],out[16];
+		byte key[16];
+		//printf("Inside main ...Compression!!!\n");
+
+		for(i=0;i<16;i++) 
+				key[i]=keyex[i];
+		
+		for(i=0;i<16;i++) 
+				in[i]=inex[i];
+		
+		for(k=0;k<16;k++)
+        out[k]=0x0;
+
+		run_aes(in1,out1,key1,nt);
+
+		#if TRNG==1
+            reset_systick();
+            begin1 = SysTick->VAL; // Obtains the start time
+   		#endif // TRNG
+		#if TRNG==0
+        	clock_t begin = clock(); // Obtains the start time
+   		#endif // TRNG
+		for(int i=0;i<nt;i++)
+		run_aes_share_RP(in2,out2,key2,n,nt);//AES with shares
+
+		#if TRNG==1
+			end1 = SysTick->VAL; // Obtains the stop time
+			time_b[0] = ((double) (begin1-end1))/nt; // Calculates the time taken
+			#endif // TRNG
+		#if TRNG==0
+			clock_t end = clock();
+			time_spent =+ (double)(end - begin)/CLOCKS_PER_SEC;
+			time_b[0] = time_spent;
+    	#endif // TRNG 
+		if (compare_output(out1, out2, 16))
+		{
+			printf("Successful execution of AES using RP \n");
+			printf("Overall timings:%f \n",time_b[0]/nt); 
+		}
+		else
+		{
+			printf("Unsuccessful execution :(, pls check...");
+		
+		}
 	}
     rand_dein();
     return 0;

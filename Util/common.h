@@ -8,7 +8,7 @@ typedef unsigned char byte;
 #define PRESENT_THIRD 2
 #define BITSLICE 3
 #define AES_HIGHER_ORDER_INCREASING_SHARES 4
-
+#define AES_RP 5
 
 #define BASIC 2
 #define LRV 3 
@@ -26,7 +26,6 @@ typedef unsigned char byte;
 
 #define UNIT 1000000 //Time unit (Milli seconds)
 
-#define SNI_RM 0 // SNI_RM can be for AES_THIRD or PRESENT_THIRD. set value to 1 for using SNI full refresh scheme. Set 0 for Third order specific SNI refresh mask.
 extern int cipher; // Cipher can be either AES/ PRESENT/ BITSLICE
 
 typedef unsigned int word;

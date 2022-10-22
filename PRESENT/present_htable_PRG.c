@@ -27,20 +27,7 @@ void present_refreshMask(byte a[4],int n)
     a[3]=b[3]^a[3]^b[0];
 }
 
-void present_fulRefresh(byte a[4])
-{
-  int i,j,n=shares_N;
-  byte tmp[1];
-  for(i=0;i<n;i++)
-  {
-  for(j=i+1;j<n;j++)
-  {
-    gen_rand(tmp,1); //rand();
-    a[i]=a[i] ^ tmp[0];
-    a[j]=a[j] ^ tmp[0];
-  }
-  }
-}
+
 
 void subbytestate_share_prg_present(byte stateshare[8][shares_N],int n,void (*subbyte_share_call)(byte *,int,int,int),int round, int type)
 {
@@ -85,13 +72,9 @@ void subbytestate_share_prg_present(byte stateshare[8][shares_N],int n,void (*su
     }
 
     //locality_refresh(stateshare[i],n);
-    #if SNI_RM==0
+   
     present_refreshMask(stateshare[i],n);
-    #endif
-    #if SNI_RM==1
-    present_fulRefresh(stateshare[i]);
-    #endif
-
+    
   }
 
 }
