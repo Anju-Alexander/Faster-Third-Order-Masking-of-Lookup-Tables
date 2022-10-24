@@ -95,7 +95,10 @@ void run_present_shares_third(byte *in,byte*out,byte *key,int n,double *time,int
     unsigned int begin1, end1;
     long sec,nsec;
     double temp=0.0,time_spent=0.0;
-
+    #if TRNG==0
+    struct timespec begin, end;
+	
+	#endif
 
     //TRNG initialisation
    
@@ -107,9 +110,8 @@ void run_present_shares_third(byte *in,byte*out,byte *key,int n,double *time,int
         begin1 = SysTick->VAL; // Obtains the start time
       #endif // TRNG
       #if TRNG==0
-        clock_t begin = clock(); // Obtains the start time
-        time_spent=0.0;
-      #endif // TRNG
+        clock_gettime(CLOCK_REALTIME, &begin);
+        #endif // TRNG
 
      /******************copying the key***************/
     for(i=0;i<8;i++)
@@ -121,13 +123,18 @@ void run_present_shares_third(byte *in,byte*out,byte *key,int n,double *time,int
     time[0] = (double) (begin1-end1); // Calculates the time taken
     #endif
     #if TRNG==0
-        clock_t end = clock();
-        time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
-        time[0] = time_spent;
-    #endif // TRNG 
+        clock_gettime(CLOCK_REALTIME, &end);
+        sec = end.tv_sec - begin.tv_sec;
+        nsec = end.tv_nsec - begin.tv_nsec;
+        temp = sec + nsec*1e-9;
+
+        time[0] = temp*UNIT;
+        #endif // TRNG
 
    // printf("Done with pre-processing of tables\n");
-
+    #if TRNG==0
+        clock_gettime(CLOCK_REALTIME, &begin);
+    #endif // TRNG
     for(int j=0;j<nt;j++)
     {
         for(i=0;i<10;i++)
@@ -147,9 +154,7 @@ void run_present_shares_third(byte *in,byte*out,byte *key,int n,double *time,int
         reset_systick();
         begin1 = SysTick->VAL; // Obtains the start time
         #endif // TRNG      
-        #if TRNG==0
-            clock_t begin = clock(); // Obtains the start time
-        #endif // TRNG
+       
          for(round=0;round<31;round++)
          {
         addroundkey_present_share(stateshare,keyshare,n);
@@ -175,12 +180,16 @@ void run_present_shares_third(byte *in,byte*out,byte *key,int n,double *time,int
         end1 = SysTick->VAL; // Obtains the stop time
         time[j+1] = ((double) (begin1-end1)); // Calculates the time taken
         #endif // TRNG
-        #if TRNG==0
-        clock_t end = clock();
-        time_spent += (double)(end - begin)/CLOCKS_PER_SEC;
-        time[1] = time_spent;
-        #endif
+        
         
     }   
+    #if TRNG==0
+        clock_gettime(CLOCK_REALTIME, &end);
+        sec = end.tv_sec - begin.tv_sec;
+        nsec = end.tv_nsec - begin.tv_nsec;
+        temp = sec + nsec*1e-9;
+
+        time[1] = temp*UNIT/nt;
+        #endif // TRNG
 
 }

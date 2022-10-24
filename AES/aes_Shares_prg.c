@@ -162,27 +162,39 @@ void run_aes_third(byte in[16], byte out[16], byte key[16], int n, void(*subbyte
 	keyexpansion_share(key, n);
 	unsigned int begin1=0,end1=0;
   double time_spent = 0.0;
+  long sec,nsec;
+    double temp=0.0;
+	#if TRNG==0
+    struct timespec begin, end;
+	
+	#endif
+  #if TRNG==0
+        clock_gettime(CLOCK_REALTIME, &begin);
+        #endif // TRNG
 	for (i = 0; i < nt; i++)
 	{
 		#if TRNG==1
             reset_systick();
             begin1 = SysTick->VAL; // Obtains the start time
             #endif // TRNG
-    #if TRNG==0
-            clock_t begin = clock(); // Obtains the start time
-            #endif // TRNG
+    
 		aes_share_subkeys_third(in, out, n, subbyte_share_call, choice);
 		
 		#if TRNG==1
             end1 = SysTick->VAL; // Obtains the stop time
             time[i+1] = ((double) (begin1-end1)); // Calculates the time taken
             #endif // TRNG
-    #if TRNG==0
-            clock_t end = clock();
-            time_spent += (double)(end - begin)/CLOCKS_PER_SEC;
-            time[1] = time_spent;
-            #endif     
+      
+   
 	}
+   #if TRNG==0
+        clock_gettime(CLOCK_REALTIME, &end);
+        sec = end.tv_sec - begin.tv_sec;
+        nsec = end.tv_nsec - begin.tv_nsec;
+        temp = sec + nsec*1e-9;
+
+        time[1] = temp*UNIT/nt;
+    #endif // TRNG 
 
 }
 
@@ -194,6 +206,10 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
 	double temp = 0.0;
 	double tim[1];
   double time_spent=0.0;
+  #if TRNG==0
+    struct timespec begin, end;
+	
+	#endif
   if(type == BASIC)
   {
     //inititialze the word sbox
@@ -202,8 +218,7 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
       begin1 = SysTick->VAL; // Obtains the start time
     #endif // TRNG
     #if TRNG==0
-        clock_t begin = clock(); // Obtains the start time
-        time_spent=0.0;
+        clock_gettime(CLOCK_REALTIME, &begin);
     #endif // TRNG
     gen_t_for_all_higher_increasing_shares(n,type,tim);
     #if TRNG==1
@@ -212,10 +227,13 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
       //time[0]=tim[0];
     #endif // TRNG
     #if TRNG==0
-        clock_t end = clock();
-        time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
-        time[0] = time_spent;
-    #endif // TRNG
+        clock_gettime(CLOCK_REALTIME, &end);
+        sec = end.tv_sec - begin.tv_sec;
+        nsec = end.tv_nsec - begin.tv_nsec;
+        temp = sec + nsec*1e-9;
+
+        time[0] = temp*UNIT/nt;
+        #endif // TRNG
     
     run_aes_third(in, out, key, n, &subbyte_htable_higher_increase_shares, nt, type, time); 
 
@@ -229,9 +247,8 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
       begin1 = SysTick->VAL; // Obtains the start time
     #endif // TRNG
     #if TRNG==0
-            clock_t begin = clock(); // Obtains the start time
-            time_spent=0.0;
-            #endif // TRNG
+        clock_gettime(CLOCK_REALTIME, &begin);
+    #endif // TRNG
     init_table_sbox();
     gen_t_for_all_higher_increasing_shares(n,type,tim);
     #if TRNG==1
@@ -240,9 +257,12 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
       //time[0] =tim[0];
     #endif // TRNG
     #if TRNG==0
-        clock_t end = clock();
-        time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
-        time[0] = time_spent;
+        clock_gettime(CLOCK_REALTIME, &end);
+        sec = end.tv_sec - begin.tv_sec;
+        nsec = end.tv_nsec - begin.tv_nsec;
+        temp = sec + nsec*1e-9;
+
+        time[0] = temp*UNIT/nt;
     #endif // TRNG
     
     run_aes_third(in, out, key, n, &subbyte_htable_higher_lrv, nt, type, time); 
@@ -258,34 +278,39 @@ void run_aes_shares_third(byte *in, byte *out, byte *key, int n, int type, int n
 	long sec, nsec;
 	double temp = 0.0;
 	double time_spent = 0.0;
-
-	if (type == BASIC)
-	{
+  #if TRNG==0
+    struct timespec begin, end;
+	
+	#endif
+	
     		
         #if TRNG==1
             reset_systick();
             begin1 = SysTick->VAL; // Obtains the start time
             #endif // TRNG
         #if TRNG==0
-            clock_t begin = clock(); // Obtains the start time
-            time_spent=0.0;
-            #endif // TRNG
+        clock_gettime(CLOCK_REALTIME, &begin);
+        #endif // TRNG
         gen_t_forall_third(n, type);
        
         #if TRNG==1
             end1 = SysTick->VAL; // Obtains the stop time
             time[0] = (double) (begin1-end1); // Calculates the time taken
             #endif // TRNG
+         
         #if TRNG==0
-            clock_t end = clock();
-            time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
-            time[0] = time_spent;
-            #endif // TRNG   
+          clock_gettime(CLOCK_REALTIME, &end);
+          sec = end.tv_sec - begin.tv_sec;
+          nsec = end.tv_nsec - begin.tv_nsec;
+          temp = sec + nsec*1e-9;
+
+          time[0] = temp*UNIT/nt;
+        #endif // TRNG
         
 		//printf("\n \n Online Phase\n\n\n");
         run_aes_third(in, out, key, n, &subbyte_htable_third, nt, type, time);	
 		
-	}
+	
  
 	
 	
@@ -395,17 +420,24 @@ void run_aes_share_RP(byte in[16],byte out[16],byte key[16],int n,int nt)
 {
 		int i;
 		byte w[176];
-		//byte wshare[176][4]; // This code implementation of second-order compression, n=3
+    unsigned int begin1=0, end1=0;
+	  double time_spent=0.0;
+	  long sec,nsec;
+    double temp=0.0;
+   
+   
+      keyexpansion(key,w);
 
-		keyexpansion(key,w);
+      for(i=0;i<176;i++)
+      {
+        share_rnga(w[i],wshare[i],n);
+      }
 
-		for(i=0;i<176;i++)
-		{
-			share_rnga(w[i],wshare[i],n);
-		}
-
-		
-		aes_share_subkeys_RP(in,out,n);
+      
+      aes_share_subkeys_RP(in,out,n);
+    
+    
+    
 }
 
 

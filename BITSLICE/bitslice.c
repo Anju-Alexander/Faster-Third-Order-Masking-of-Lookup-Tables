@@ -131,11 +131,7 @@ void bs_shiftrows_c1(unsigned int X[8])
 }
 
 
-void bitslice(unsigned int X[8]){//(unsigned int *X,unsigned int *S) {
-	/*unsigned int* Y=(unsigned int*) malloc(22*sizeof(unsigned int));
-	unsigned int* T=(unsigned int*) malloc(68*sizeof(unsigned int));
-	unsigned int* Z=(unsigned int*) malloc(18*sizeof(unsigned int));
-	unsigned int* S=(unsigned int*) malloc(8*sizeof(unsigned int));*/
+void bitslice(unsigned int X[8]){
 	unsigned int Y[22], T[68], Z[18], S[8];
 
     int i=0;
@@ -278,11 +274,7 @@ void bitslice(unsigned int X[8]){//(unsigned int *X,unsigned int *S) {
 	X[5] = S[5];
 	X[6] = S[6];
 	X[7] = S[7];
-/*
-	free(Y);
-	free(T);
-	free(S);
-	free(Z);*/
+
 
 }
 
@@ -419,14 +411,7 @@ void run_bitslice(byte in[16],byte out[16],byte key[16],int nt)
 }
 
 //********************with shares*******************//
- //byte w[176];
- //unsigned int w_bs[88];
- //byte wshare[176][shares_N];
- // unsigned int wshare_bs[88][shares_N];
- //byte stateshare[16][shares_N];
 
-  //unsigned int state_bs[8][shares_N];
-//bit_array is wshare and whare_bs is arr_b
  void encode_bskeyn()
 {
    int i,row=0,k,t,j=15,m,l=0,tmp,tmp1,tmp2;
@@ -454,37 +439,9 @@ void run_bitslice(byte in[16],byte out[16],byte key[16],int nt)
 		    }
 		}
   }
-  /*
-	for(m=0;m<n;m++)
-	{
-		for(row=0;row<11;row++)
-		{
-		l=7;
-		for(k=0;k<8;k++)
-		{
-		   tmp=8*row;
-           wshare_bs[tmp+k][m]=0;
-           j=15;
-           /*
-            for(i=0;i<16;i++)
-			{
-                //t=(1 & (bit_array[16*row+i][m] >> l));//(1 && (bit_array[i] >> (k+1 )));
-                 t=(1 & (wshare[16*row+i][m] >> l));//(1 && (bit_array[i] >> (k+1 )));
-                //arr_b[8*row+k][m]=arr_b[8*row+k][m]+t*pow_cus(2,j);
-                wshare_bs[8*row+k][m]=wshare_bs[8*row+k][m]+t*pow_cus(2,j);
-                j--;
-            }
-            *//*
-            l--;
-		}
-
-		}
-	}*/
+ 
 }
-//byte stateshare[16][shares_N];
 
-  //unsigned int state_bs[8][shares_N];
-  //staeshare is bit_array state_bs is arr_b
 void encode_bsn(){
 byte i,k,t,j=15,l=7;
 int m;
@@ -599,8 +556,7 @@ void AND4(unsigned int c1[shares_N],unsigned int a1[shares_N],unsigned int b1[sh
     }
     ANDn(temp,temp1,temp2);
 	fullrefresh(temp);
-	//fullrefresh on unpack
-    ////unpacking
+
     for(int i=0;i<n;i++)
     {
        c1[i]=temp[i]>>16;
@@ -638,24 +594,7 @@ void bs_bitslicen()
 	int i,n=shares_N;
 	unsigned int Y[22][shares_N];
 
-	/*for(i=0;i<22;i++)
-	{
-		Y[i]=(unsigned int*) malloc(n*sizeof(unsigned int));
-	}
-   
-
-	for(i=0;i<68;i++)
-	{
-		T[i]=(unsigned int*) malloc(n*sizeof(unsigned int));
-	}
-	for(i=0;i<18;i++)
-	{
-		Z[i]=(unsigned int*) malloc(n*sizeof(unsigned int));
-	}
-	for(i=0;i<8;i++)
-	{
-		S[i]=(unsigned int*) malloc(n*sizeof(unsigned int));
-	}*/
+	
 
 	XOR1n(Y[14] , state_bs[3] , state_bs[5]);
 	XOR1n(Y[13] , state_bs[0] , state_bs[6]);
@@ -684,18 +623,12 @@ void bs_bitslicen()
 
 	//middle non-linear
    
-	//ANDn(T[2] , Y[12] , Y[15]);
-	//ANDn(T[3] , Y[3] , Y[6]);
     AND4(T1[2] , Y[12] , Y[15],T1[3] , Y[3] , Y[6]);
-    //printf("done\n");
-	//ANDn(T[5] , Y[4] , state_bs[7]);
-	//ANDn(T[7] , Y[13] , Y[16]);
+    
     AND4(T1[5] , Y[4] , state_bs[7] ,T1[7] , Y[13] , Y[16]);
-	//ANDn(T[8] , Y[5] , Y[1]);
-	//ANDn(T[10] , Y[2] , Y[7]);
+	
     AND4(T1[8] , Y[5] , Y[1], T1[10] , Y[2] , Y[7]);
-	//ANDn(T[12] , Y[9] , Y[11]);
-	//ANDn(T[13] , Y[14] , Y[17]);
+	
     AND4(T1[12] , Y[9] , Y[11],T1[13] , Y[14] , Y[17]);
 	XOR1n(T1[4] , T1[3] , T1[2]);
 	XOR1n(T1[6] , T1[5] , T1[2]);
@@ -707,8 +640,7 @@ void bs_bitslicen()
 	XOR1n(T1[21] , T1[17] , Y[20]);
     
 	XOR1n(T1[23] , T1[19] , Y[21]);
-	//ANDn(T[15] , Y[8] , Y[10]);
-	//ANDn(T[26] , T[21] , T[23]);
+
     AND4(T1[15] , Y[8] , Y[10],T1[26] , T1[21] , T1[23]);
 	XOR1n(T1[16] , T1[15] , T1[12]);
 	XOR1n(T1[18] , T1[6] , T1[16]);
@@ -719,21 +651,18 @@ void bs_bitslicen()
 	XOR1n(T1[25] , T1[21] , T1[22]);
 	XOR1n(T1[27] , T1[24] , T1[26]);
 	XOR1n(T1[31] , T1[22] , T1[26]);
-	//ANDn(T[28] , T[25] , T[27]);
-	//ANDn(T[32] , T[31] , T[30]);
+	
     AND4(T1[28] , T1[25] , T1[27],T1[32] ,T1[31], T1[30]);
 	XOR1n(T1[29] , T1[28] , T1[22]);
 	XOR1n(T1[33] , T1[32] , T1[24]);
 	XOR1n(T1[34] , T1[23] , T1[33]);
 	XOR1n(T1[35] , T1[27] , T1[33]);
 	XOR1n(T1[42] , T1[29] , T1[33]);
-	//ANDn(Z[14] , T[29] , Y[2]);
-	//ANDn(T[36] , T[24] , T[35]);
+	
     AND4(Z1[14] , T1[29] , Y[2],T1[36] , T1[24] , T1[35]);
 	XOR1n(T1[37] , T1[36] , T1[34]);
 	XOR1n(T1[38] , T1[27] , T1[36]);
-	//ANDn(T[39] , T[29] , T[38]);
-	//ANDn(Z[5] , T[29] , Y[7]);
+	
     AND4(T1[39] , T1[29] , T1[38],Z1[5] , T1[29] , Y[7]);
 
 
@@ -743,30 +672,21 @@ void bs_bitslicen()
 	XOR1n(T1[43] , T1[29] , T1[40]);
 	XOR1n(T1[45] , T1[42] , T1[41]);
 	
-	//ANDn(Z[0] , T[44] , Y[15]);
-	//ANDn(Z[1] , T[37] , Y[6]);
+	
     AND4(Z1[0] , T1[44] , Y[15],Z1[1] , T1[37] , Y[6]);
 
-	//ANDn(Z[2] , T[33] , state_bs[7]);
-	//ANDn(Z[3] , T[43] , Y[16]);
     AND4(Z1[2] , T1[33] , state_bs[7],Z1[3] , T1[43] , Y[16]);
-	//ANDn(Z[4] , T[40] , Y[1]);
-	//ANDn(Z[6] , T[42] , Y[11]);
+	
     AND4(Z1[4] , T1[40] , Y[1],Z1[6] , T1[42] , Y[11]);
-	//ANDn(Z[7] , T[45] , Y[17]);
-	//ANDn(Z[8] , T[41] , Y[10]);
+	
     AND4(Z1[7] , T1[45] , Y[17],Z1[8] , T1[41] , Y[10]);
-	//ANDn(Z[9] , T[44] , Y[12]);
-	//ANDn(Z[10] , T[37] , Y[3]);
+	
     AND4(Z1[9] , T1[44] , Y[12],Z1[10] , T1[37] , Y[3]);
-	//ANDn(Z[11] , T[33] , Y[4]);
-	//ANDn(Z[12] , T[43] , Y[13]);
+	
     AND4(Z1[11] , T1[33] , Y[4],Z1[12] , T1[43] , Y[13]);
-	//ANDn(Z[13] , T[40] , Y[5]);
-	//ANDn(Z[15] , T[42] , Y[9]);
+	
     AND4(Z1[13] , T1[40] , Y[5],Z1[15] , T1[42] , Y[9]);
-	//ANDn(Z[16] , T[45] , Y[14]);
-	//ANDn(Z[17] , T[41] , Y[8]);
+	
     AND4(Z1[16] , T1[45] , Y[14], Z1[17] ,T1[41] , Y[8]);
     
 	//bottom linear
@@ -813,16 +733,6 @@ void bs_bitslicen()
 	XOR1n(S1[7] , T1[48], T1[60]);
 	NOTn(S1[7]);
 
-//throwing hardfalut error
-/*	MOVn(state_bs[0], S1[0]);
-	MOVn(state_bs[1], S1[1]);
-	MOVn(state_bs[2], S1[2]);
-	MOVn(state_bs[3], S1[3]);
-	MOVn(state_bs[4], S1[4]);
-//	MOVn(state_bs[5], S1[5]);
-//	MOVn(state_bs[6], S1[6]);
-//	MOVn(state_bs[7], S1[7]);*/
-
 	for(i=0;i<8;i++)
 	{
 		for(int j=0;j<n;j++)
@@ -831,24 +741,7 @@ void bs_bitslicen()
 		}
 	}
 
-	/*for(i=0;i<22;i++)
-	{
-		free(Y[i]);
-	}
-
-	for(i=0;i<68;i++)
-	{
-		free(T[i]);s
-	}
-	for(i=0;i<18;i++)
-	{
-		free(Z[i]);
-	}
-	for(i=0;i<8;i++)
-	{
-		free(S[i]);
-	}*/
-
+	
 
 }
 
@@ -921,11 +814,6 @@ void bs_mixColumnsn()
     int n=shares_N,i;
 	unsigned int of[shares_N],t1;
 
-/*	for(i=0;i<8;i++)
-         temp[i]=(unsigned int*) malloc(n*sizeof(unsigned int));
-
-    temp1=(unsigned int*) malloc(n*sizeof(unsigned int));
-    of=(unsigned int*) malloc(n*sizeof(unsigned int));*/
 
 	MOVn(temp1,state_bs[0]);
 	swapBits_sharen(temp1,3,15);
@@ -982,9 +870,6 @@ void aes_share_subkeys_bitslice(byte in[16],byte out[16])
   for(i=0;i<16;i++)
   {
    
-	//since going nt hard fault doing without calling the funtcion
-
-	//share(in[i],stateshare[i],n);
 	stateshare[i][0]=in[i]; //x
 	for(int j=1;j<n;j++)
 	stateshare[i][j]=0;
@@ -999,9 +884,6 @@ void aes_share_subkeys_bitslice(byte in[16],byte out[16])
 	}
     
   }
-
-  //for(i=0;i<8;i++)
-	  //state_bs[i]=(unsigned int*) malloc(n*sizeof(unsigned int));
 
     encode_bsn();
     bs_addroundkeyn(0);
@@ -1038,15 +920,10 @@ int run_aes_share_bitslice(byte in[16],byte out[16],byte key[16],int nt){
 
   int i,k,n=shares_N;
 	byte x;
-  //byte w[176];
-  //byte wshare[176][shares_N]; // for key bitslice representation should contain [3][176] input and [88][3] output
-  //unsigned int wshare_bs[88][shares_N];
   keyexpansion(key,w);
   for(i=0;i<176;i++)
   {
-    //wshare[i]=(byte *) malloc(n*sizeof(byte));
-    //share(w[i],wshare[i],n);
-    //share doing it manually as its showing hard fault error
+    //share doing it manually as it was showing hard fault error in the target machine
     x=w[i];
     wshare1[i][0]=x;
     for(int j=1;j<n;j++)
@@ -1062,9 +939,6 @@ int run_aes_share_bitslice(byte in[16],byte out[16],byte key[16],int nt){
     //refresh(wshare[i],n);
     
    }
-/*
-	for(i=0;i<88;i++)
-		wshare_bs[i]=(unsigned int *) malloc(n*sizeof(unsigned int));*/
 
 	encode_bskeyn();
 
@@ -1073,9 +947,7 @@ int run_aes_share_bitslice(byte in[16],byte out[16],byte key[16],int nt){
     aes_share_subkeys_bitslice(in,out);
   }
 
-  /*for(i=0;i<176;i++)
-    free(wshare[i]);
-*/
+  
   return (double) (0.00) ;
 
 }
@@ -1086,13 +958,19 @@ void run_bitslice_shares(byte in[16],byte out[16],byte key[16],int nt,double *ti
 {
 	unsigned int begin1=0, end1=0;
 	double time_spent=0.0;
+	long sec,nsec;
+    double temp=0.0;
+	#if TRNG==0
+    struct timespec begin, end;
+	
+	#endif
 	 #if TRNG==1
             reset_systick();
             begin1 = SysTick->VAL; // Obtains the start time
     #endif // TRNG
 	#if TRNG==0
-        clock_t begin = clock(); // Obtains the start time
-    #endif // TRNG
+        clock_gettime(CLOCK_REALTIME, &begin);
+        #endif // TRNG
    for(int i=0;i<nt;i++)
    run_aes_share_bitslice(in,out,key,nt);
 	
@@ -1101,9 +979,12 @@ void run_bitslice_shares(byte in[16],byte out[16],byte key[16],int nt,double *ti
         time_b[0] = ((double) (begin1-end1))/nt; // Calculates the time taken
     #endif // TRNG
 	#if TRNG==0
-        clock_t end = clock();
-        time_spent =+ (double)(end - begin)/CLOCKS_PER_SEC;
-        time_b[0] = time_spent;
+        clock_gettime(CLOCK_REALTIME, &end);
+        sec = end.tv_sec - begin.tv_sec;
+        nsec = end.tv_nsec - begin.tv_nsec;
+        temp = sec + nsec*1e-9;
+
+        time_b[0] = temp*UNIT/nt;
     #endif // TRNG 
 
 }

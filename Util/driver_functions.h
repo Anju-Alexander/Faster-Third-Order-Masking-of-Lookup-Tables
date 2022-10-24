@@ -8,3 +8,4 @@
  void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int n, int type, int nt, double time[11]);
  /*******************AES_RP********************************************/
  void run_aes_share_RP(byte in[16],byte out[16],byte key[16],int n,int nt);
+ //void run_bitslice_shares(byte in[16],byte out[16],byte key[16],int nt,double *time_b)

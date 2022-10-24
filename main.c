@@ -1,28 +1,35 @@
 
-//Third-order lookup table based compression scheme.
+//Third-order lookup table based compression scheme.  Author Anju Alexander and Annapurna Valiveti.
 
-#if TRNG  ==1
-#include "MK64F12.h"
-#endif
+/*The code for header files aes.h, aes_share.h, aes_htable_RP.h, share.h and souce code files 
+aes.c, aes_share.c, aes_htable_RP.c and share.c are taken from the public github repository https://github.com/coron/htable. 
+The code for unmasked PRESENT is from http://www.lightweightcrypto.org/implementations.php.
+The code for bitsliced implementation was taken from the public repository https://github.com/annapurna-pvs/Higher-Order-LUT-PRG
+Few methods from these files are customized according to the target architecture requirements.*/
+
 #include <stdio.h>
-
 #include "AES/aes.h"
 #include "BITSLICE/bitslice.h"
 #include "PRESENT/present.h"
 #include "Util/driver_functions.h"
 #include "time.h"
+#if TRNG==1
+#include "MK64F12.h"
+#endif
 
 int main()
 {
 
     int nt = 10; //Number of times to repeat experiments
     int shares = shares_N; // #Input shares. Set the parameter in common.h.
-    int cipher = AES_RP; //Cipher can be AES_THIRD, PRESENT_THIRD, AES_RP, BITSLICE or AES_HIGHER_ORDER_INCREASING_SHARES
+    int cipher =AES_THIRD; //Cipher can be AES_THIRD, PRESENT_THIRD, AES_RP, BITSLICE or AES_HIGHER_ORDER_INCREASING_SHARES
     int type=BASIC; //for AES_THIRD type can be BASIC, for PRESENT_THIRD type can be BASIC,  AES_HO_I_S it can be BASIC or LRV
    
     double time[11]={0,0,0,0,0,0,0,0,0,0,0};// To hold offline and online execution clock cycle count
     double time_b[1]={0};
     int i,k,al;
+	long sec,nsec;
+    double temp=0.0;
     rand_in();
     if(cipher==AES_THIRD||cipher==AES_HIGHER_ORDER_INCREASING_SHARES)
     {
@@ -72,8 +79,8 @@ int main()
 			else if(cipher ==AES_HIGHER_ORDER_INCREASING_SHARES && type ==LRV)
 			printf("Successful execution of LUT-based AES using increasing shares higher order scheme using LRV\n");
 
-		    printf("Offline timings:%f \n",time[0]);
-			printf("Online timings:%f \n",time[1]/nt);   
+		    printf("(Milli seconds) Offline timings:%f \n",time[0]);
+			printf("(Milli seconds) Online timings:%f \n",time[1]);   
 		}
 		else
 		{
@@ -108,8 +115,8 @@ int main()
 		if(compare_output(out1,out2,8))
         {
             printf("Successful execution of LUT-based PRESENT using customized third order scheme\n");
-			printf("Offline timings:%f \n",time[0]);
-			printf("Online timings:%f \n",time[1]/nt); 
+			printf("(Milli seconds) Offline timings:%f \n",time[0]);
+			printf("(Milli seconds) Online timings:%f \n",time[1]); 
         }
 
         else
@@ -147,7 +154,7 @@ int main()
 		if (compare_output(out1, out2, 16))
 		{
 			printf("Successful execution of LUT-based AES using BITSLICE \n");
-			printf("Overall timings:%f \n",time_b[0]/nt); 
+			printf("(Milli seconds) Overall timings:%f \n",time_b[0]); 
 		}
 		else
 		{
@@ -158,11 +165,14 @@ int main()
 	}
 	if(cipher==AES_RP)
 	{
-		volatile double time_b[1]={0};
-		byte n=4,l=1; //Second-order, n=3.
+		volatile double time_b1[1]={0};
+		byte n=shares_N; //Second-order, n=3.
 		/****************Test vectors********************/
 		volatile unsigned int begin1=0, end1=0;
 		double time_spent=0.0;
+		#if TRNG==0
+			struct timespec begin, end;
+		#endif
 		byte keyex[16]={0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c};
 		byte inex[16]={0x32,0x43,0xf6,0xa8,0x88,0x5a,0x30,0x8d,0x31,0x31,0x98,0xa2,0xe0,0x37,0x07,0x34};
 		byte outex[16]={0x39,0x25,0x84,0x1d,0x02,0xdc,0x09,0xfb,0xdc,0x11,0x85,0x97,0x19,0x6a,0x0b,0x32};
@@ -188,7 +198,7 @@ int main()
 		}
 		byte in[16],out[16];
 		byte key[16];
-		//printf("Inside main ...Compression!!!\n");
+		
 
 		for(i=0;i<16;i++) 
 				key[i]=keyex[i];
@@ -200,30 +210,35 @@ int main()
         out[k]=0x0;
 
 		run_aes(in1,out1,key1,nt);
-
-		#if TRNG==1
+		
+		
+		#if TRNG==0
+        	clock_gettime(CLOCK_REALTIME, &begin);
+        #endif // TRNG
+		 #if TRNG==1
             reset_systick();
             begin1 = SysTick->VAL; // Obtains the start time
-   		#endif // TRNG
-		#if TRNG==0
-        	clock_t begin = clock(); // Obtains the start time
-   		#endif // TRNG
+   		 #endif // TRNG
 		for(int i=0;i<nt;i++)
 		run_aes_share_RP(in2,out2,key2,n,nt);//AES with shares
-
+		
 		#if TRNG==1
 			end1 = SysTick->VAL; // Obtains the stop time
-			time_b[0] = ((double) (begin1-end1))/nt; // Calculates the time taken
-			#endif // TRNG
+			time_spent = ((double) (begin1-end1))/nt; // Calculates the time taken
+    	#endif // TRNG
+
 		#if TRNG==0
-			clock_t end = clock();
-			time_spent =+ (double)(end - begin)/CLOCKS_PER_SEC;
-			time_b[0] = time_spent;
-    	#endif // TRNG 
+			clock_gettime(CLOCK_REALTIME, &end);
+			sec = end.tv_sec - begin.tv_sec;
+			nsec = end.tv_nsec - begin.tv_nsec;
+			temp = sec + nsec*1e-9;
+
+			time_b[0] = temp*UNIT/nt;
+        #endif // TRNG
 		if (compare_output(out1, out2, 16))
 		{
 			printf("Successful execution of AES using RP \n");
-			printf("Overall timings:%f \n",time_b[0]/nt); 
+			printf("(Milli seconds) Overall timings:%f \n",time_b[0]); 
 		}
 		else
 		{
