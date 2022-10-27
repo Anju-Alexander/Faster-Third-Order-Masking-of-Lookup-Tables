@@ -98,15 +98,14 @@ void read_htable_present_third(byte a,byte *b,int n,int count,int type)
    byte x1= p_x_shares[t1], x2=p_x_shares[t1+1], x3=p_x_shares[t1+2];
    b[0]=T2_p[t+(a)];
    
-   if(type==BASIC)
+   
+    unsigned int t2=count*(n-2);
+    for(int i=1;i<n-1;i++)
     {
-        unsigned int t2=count*(n-2);
-        for(int i=1;i<n-1;i++)
-        {
-            b[i]=p_y_shares[t2+i-1];
-        }
-        b[n-1]=Y3_p[t+a];
+        b[i]=p_y_shares[t2+i-1];
     }
+    b[n-1]=Y3_p[t+a];
+    
 
 }
 
@@ -161,34 +160,26 @@ void gen_t_forall_present_third(int n, int type)
             p_x_shares[temp+j]=(a[j]%16);
    
         }
+        
+        byte b[n-2];
+        gen_rand(b,n-2);
+        temp=i*(n-2);
 
-       
-        if(type==BASIC)
+        for(j=0;j<n-2;j++)
         {
-            byte b[n-2];
-            gen_rand(b,n-2);
-		    temp=i*(n-2);
+            p_y_shares[temp+j]=(b[j]%16);
 
-		    for(j=0;j<n-2;j++)
-            {
-                p_y_shares[temp+j]=(b[j]%16);
-    
-            }
-           gen_rand(c,P_TSIZE);
-		   temp=i*P_TSIZE;
+        }
+        gen_rand(c,P_TSIZE);
+        temp=i*P_TSIZE;
 
-		   for(j=0;j<P_TSIZE;j++)
-           {
-            Y3_p[temp+j]=(c[j]%16);
-           
-           }
-
-		   htable_m_present_third(n,i);
+        for(j=0;j<P_TSIZE;j++)
+        {
+        Y3_p[temp+j]=(c[j]%16);
+        
         }
 
-       
-
-       
+        htable_m_present_third(n,i);
 
     }
 

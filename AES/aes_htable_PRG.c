@@ -31,8 +31,9 @@ byte T2_c[40960][shares_N];
 
 //*****************specific to AES third order PRG*********************//
 
-void refresh_mask_sni(byte y_cw[4])
+void refresh_mask_sni(byte y_cw[4]) 
 {
+	//3-SNI scure refresh mask scheme
    byte t[4];
    gen_rand(t,4);
    y_cw[0]=(y_cw[0]^t[0])^t[3];
@@ -89,6 +90,31 @@ void subbytestate_share_prg(byte stateshare[16][shares_N],int n,void (*subbyte_s
   }
 
 }
+void subbyte_htable_third(byte y[shares_N], int n, int ind, int choice)
+{
+	//this function reads from the precomputed 
+	byte x4;
+	
+	unsigned int t2 = ind*TSIZE;
+	x4 = y[n - 1];
+    
+	y[0] = T2[t2 + x4]; //y4
+	
+	unsigned int t1 = ind*(shares_N - 2);
+	for (int i = 1; i < shares_N - 1; i++) //n=4, thus y0 and y1
+	{
+	y[i] = y_shares[t1 + i - 1]; //y1 y2
+	}
+	y[n - 1] = Y3[t2 + x4];
+	
+	
+
+   refresh_mask_sni(y); //3-SNI secure refresh scheme 
+   
+   
+    
+}
+
 
 void subbytestate_share_third(byte stateshare[16][shares_N], int n, void(*subbyte_share_call)(byte *, int, int, int), int round, int choice)
 {
@@ -112,33 +138,8 @@ void subbytestate_share_third(byte stateshare[16][shares_N], int n, void(*subbyt
 
 }
 
-void subbyte_htable_third(byte y[shares_N], int n, int ind, int choice)
-{
 
-	byte x4;
-	
-	unsigned int t2 = ind*TSIZE;
-	x4 = y[n - 1];
-    
-	y[0] = T2[t2 + x4]; //y4
-	if(choice==BASIC)
-	{
-		unsigned int t1 = ind*(shares_N - 2);
-		for (int i = 1; i < shares_N - 1; i++) //n=4, thus y0 and y1
-		{
-		y[i] = y_shares[t1 + i - 1]; //y1 y2
-        }
-	    y[n - 1] = Y3[t2 + x4];
-	}
-	
-
-   refresh_mask_sni(y);
-   
-   
-    
-}
-
-void htable_third(int n, int count, int choice)
+void htable_third(int n, int count, int choice)//this function precomputes the table T2
 {
 	unsigned int j, i, t, t1, temp, temp1, k = 0;
 	byte Tp[TSIZE], v[1], d, b;
@@ -164,7 +165,7 @@ void htable_third(int n, int count, int choice)
     
 }
 
-void gen_t_forall_third(int n, int choice)
+void gen_t_forall_third(int n, int choice) //this function does the preprocessing phase of the AES-THIRD order scheme
 {
 	unsigned int i, j, temp1, temp2, temp3;
 	byte a[shares_N - 1],  c[TSIZE], common;
@@ -180,8 +181,7 @@ void gen_t_forall_third(int n, int choice)
 			x_shares[temp1 + j] = a[j]; //need for both the choices
      
 		}
-        if (choice == BASIC)
-		{
+        
 			byte b[shares_N - 2];
 			
 			gen_rand(b, n - 2);
@@ -199,7 +199,7 @@ void gen_t_forall_third(int n, int choice)
             
 			}
 			htable_third(n, i, choice);
-		}
+		
 	
 		
         
@@ -210,6 +210,7 @@ void gen_t_forall_third(int n, int choice)
 //**********************************specific to AES LRV**********************************
 void init_table_sbox()
 {
+	//Specific to LRV variant, rewritting the sbox[256] to word format sbox_Word[64]
   for(int k=0;k<TSIZE/w1; k++)
   {
     word r=0;
@@ -244,6 +245,7 @@ void refresh_mask(int ct,word y_cw[4])
 
 void subbyte_htable_higher_lrv(byte y[shares_N], int n, int ind, int choice)
 {
+	
 	int i,j;
 	byte x4=y[n-1];
 	unsigned int t=ind*(TSIZE/w1),tmp=ind*(shares_N-1);
@@ -284,7 +286,6 @@ void subbyte_htable_higher_lrv(byte y[shares_N], int n, int ind, int choice)
 		
 	}
     refresh_mask_byte(n-1,T1_s[i]);
-	//refresh_mask_sni(T1_s[i]);
 	for(int l=0;l<n;l++)
 	y[l]=T1_s[x4_l][l];
 	
@@ -292,7 +293,7 @@ void subbyte_htable_higher_lrv(byte y[shares_N], int n, int ind, int choice)
 
 void htable_gen_higher_lrv(int ind)
 {
-	
+	//this function generates the pre-computed table for Corons' AES_HO_I scheme LRV variant
 	int size=TSIZE/w1;
 	int k1=6,k2=2,n=shares_N,i,j,l;
 	unsigned int t=ind*(size);
@@ -334,7 +335,8 @@ void subbyte_htable_higher_increase_shares(byte y[shares_N], int n, int ind, int
 {
 	byte x4=y[n-1];
 	unsigned int temp=ind*(shares_N-1),tmp=ind*TSIZE;
-	refresh_mask_sni(T2_c[tmp+x4]);
+	//refresh_mask_sni(T2_c[tmp+x4]);
+	refresh_mask_byte_LR(T2_c[tmp+x4]);
 	for(int i=0;i<n;i++)
 	{
 		y[i]=T2_c[tmp+x4][i];
@@ -344,6 +346,7 @@ void subbyte_htable_higher_increase_shares(byte y[shares_N], int n, int ind, int
 
 void htable_gen_higher_increase_shares(int ind)
 {
+	//this function generates the pre-computed table for Corons' AES_HO_I scheme
 	int n=shares_N, tmp=ind*TSIZE,temp1=ind*(shares_N-1);
 	int i,j,l;
 	byte T_aux[TSIZE][n],x;
@@ -378,9 +381,12 @@ void htable_gen_higher_increase_shares(int ind)
 
 	
 }
-
+//if you are running this code in the microcontroller, the Systick timer would overflow and give incorrect clock cycle count
+//for offline time. run the for loop in “gen_t_for_all_higher_increasing_shares” in AES/aes_htable_PRG.c  by 16 times 
+//instead of 160 and then multiply the resulting offline time by 10, to get the actual offline time.
 void gen_t_for_all_higher_increasing_shares(int n, int choice, double tim[1])
 {
+	//pre-processing phase of Corons' AES_HO_I scheme
 	n=shares_N;
 	unsigned int temp1;
 	byte a[n-1];

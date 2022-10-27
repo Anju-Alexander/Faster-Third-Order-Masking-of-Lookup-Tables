@@ -7,6 +7,10 @@ The code for unmasked PRESENT is from http://www.lightweightcrypto.org/implement
 The code for bitsliced implementation was taken from the public repository https://github.com/annapurna-pvs/Higher-Order-LUT-PRG
 Few methods from these files are customized according to the target architecture requirements.*/
 
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the  GPL-3.0 license
+
+
 #include <stdio.h>
 #include "AES/aes.h"
 #include "BITSLICE/bitslice.h"
@@ -61,14 +65,14 @@ int main()
 		}
 		
 		unsigned int begin1, end1, begin2, end2;
-        run_aes(in1, out1, key1, nt);
+        run_aes(in1, out1, key1, nt); //unprotected AES implementation
 		if(cipher==AES_THIRD)
-        run_aes_shares_third(in2,out2,key2,shares,type,nt,time);
+        run_aes_shares_third(in2,out2,key2,shares,type,nt,time); //customised third-order code for AES-128
 
 		if(cipher==AES_HIGHER_ORDER_INCREASING_SHARES)
-		run_aes_higher_order_increasing_shares(in2,out2,key2,shares,type,nt,time);
+		run_aes_higher_order_increasing_shares(in2,out2,key2,shares,type,nt,time); //Coron's Higher order increasing shares implementation at order=3 for AES-128
 
-		if (compare_output(out1, out2, 16))
+		if (compare_output(out1, out2, 16)) //verifying the output 
 		{
 			if(cipher ==AES_THIRD)
 			printf("Successful execution of LUT-based AES using customized third order scheme \n");
@@ -110,9 +114,9 @@ int main()
             out1[k]=0x0;
             out2[k]=0x0;
         }
-		present(in1,out1,key1);
-		run_present_shares_third(in2,out2,key2,shares,time,nt,type);
-		if(compare_output(out1,out2,8))
+		present(in1,out1,key1); //unprotected PRESENT Implementation
+		run_present_shares_third(in2,out2,key2,shares,time,nt,type);//customised third-order code for PRESENT
+		if(compare_output(out1,out2,8))//verifying the output 
         {
             printf("Successful execution of LUT-based PRESENT using customized third order scheme\n");
 			printf("(Milli seconds) Offline timings:%f \n",time[0]);
@@ -149,9 +153,9 @@ int main()
 			in2[i]=inex[i];
 		}	
 		
-		run_bitslice(in1,out1,key1,nt);
-		run_bitslice_shares(in2,out2,key2,nt,time_b);
-		if (compare_output(out1, out2, 16))
+		run_bitslice(in1,out1,key1,nt);//unprotected AES-BITLICED Implementation
+		run_bitslice_shares(in2,out2,key2,nt,time_b); //32-bit bitsliced implementation with shares
+		if (compare_output(out1, out2, 16))//verifying the output 
 		{
 			printf("Successful execution of LUT-based AES using BITSLICE \n");
 			printf("(Milli seconds) Overall timings:%f \n",time_b[0]); 
@@ -209,7 +213,7 @@ int main()
 		for(k=0;k<16;k++)
         out[k]=0x0;
 
-		run_aes(in1,out1,key1,nt);
+		run_aes(in1,out1,key1,nt); //unprotected AES implementation
 		
 		
 		#if TRNG==0
@@ -220,7 +224,7 @@ int main()
             begin1 = SysTick->VAL; // Obtains the start time
    		 #endif // TRNG
 		for(int i=0;i<nt;i++)
-		run_aes_share_RP(in2,out2,key2,n,nt);//AES with shares
+		run_aes_share_RP(in2,out2,key2,n,nt);//AES_RP scheme with shares
 		
 		#if TRNG==1
 			end1 = SysTick->VAL; // Obtains the stop time
@@ -235,7 +239,7 @@ int main()
 
 			time_b[0] = temp*UNIT/nt;
         #endif // TRNG
-		if (compare_output(out1, out2, 16))
+		if (compare_output(out1, out2, 16)) //verifying the output
 		{
 			printf("Successful execution of AES using RP \n");
 			printf("(Milli seconds) Overall timings:%f \n",time_b[0]); 

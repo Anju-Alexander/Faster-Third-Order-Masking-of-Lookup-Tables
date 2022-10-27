@@ -158,6 +158,7 @@ void aes_share_subkeys(byte in[16],byte out[16],int n,void (*subbyte_share_call)
 
 void run_aes_third(byte in[16], byte out[16], byte key[16], int n, void(*subbyte_share_call)(byte *, int, int, int), int nt, int choice, double time[11])
 {
+  //the online phase of the AES-THIRD order scheme
 	int i;
 	keyexpansion_share(key, n);
 	unsigned int begin1=0,end1=0;
@@ -178,7 +179,7 @@ void run_aes_third(byte in[16], byte out[16], byte key[16], int n, void(*subbyte
             begin1 = SysTick->VAL; // Obtains the start time
             #endif // TRNG
     
-		aes_share_subkeys_third(in, out, n, subbyte_share_call, choice);
+		aes_share_subkeys_third(in, out, n, subbyte_share_call, choice); //online phase of the AES-THIRD order scheme
 		
 		#if TRNG==1
             end1 = SysTick->VAL; // Obtains the stop time
@@ -220,7 +221,7 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
     #if TRNG==0
         clock_gettime(CLOCK_REALTIME, &begin);
     #endif // TRNG
-    gen_t_for_all_higher_increasing_shares(n,type,tim);
+    gen_t_for_all_higher_increasing_shares(n,type,tim); //pre-processing phase of Corons' AES_HO_I scheme
     #if TRNG==1
       end1 = SysTick->VAL; // Obtains the stop time
       time[0] = (double) (begin1-end1); // Calculates the time taken
@@ -235,7 +236,7 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
         time[0] = temp*UNIT/nt;
         #endif // TRNG
     
-    run_aes_third(in, out, key, n, &subbyte_htable_higher_increase_shares, nt, type, time); 
+    run_aes_third(in, out, key, n, &subbyte_htable_higher_increase_shares, nt, type, time);  //Online phase
 
   }
 
@@ -250,7 +251,7 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
         clock_gettime(CLOCK_REALTIME, &begin);
     #endif // TRNG
     init_table_sbox();
-    gen_t_for_all_higher_increasing_shares(n,type,tim);
+    gen_t_for_all_higher_increasing_shares(n,type,tim); //pre-processing phase of Corons' AES_HO_I scheme LRV variant
     #if TRNG==1
       end1 = SysTick->VAL; // Obtains the stop time
       time[0] = (double) (begin1-end1); // Calculates the time taken
@@ -265,7 +266,7 @@ void run_aes_higher_order_increasing_shares(byte *in, byte *out, byte *key, int 
         time[0] = temp*UNIT/nt;
     #endif // TRNG
     
-    run_aes_third(in, out, key, n, &subbyte_htable_higher_lrv, nt, type, time); 
+    run_aes_third(in, out, key, n, &subbyte_htable_higher_lrv, nt, type, time); //Online phase
 
   }
 	
@@ -291,7 +292,7 @@ void run_aes_shares_third(byte *in, byte *out, byte *key, int n, int type, int n
         #if TRNG==0
         clock_gettime(CLOCK_REALTIME, &begin);
         #endif // TRNG
-        gen_t_forall_third(n, type);
+        gen_t_forall_third(n, type); //the pre-processing phase of the AES-THIRD ORDER scheme
        
         #if TRNG==1
             end1 = SysTick->VAL; // Obtains the stop time
@@ -308,7 +309,7 @@ void run_aes_shares_third(byte *in, byte *out, byte *key, int n, int type, int n
         #endif // TRNG
         
 		//printf("\n \n Online Phase\n\n\n");
-        run_aes_third(in, out, key, n, &subbyte_htable_third, nt, type, time);	
+        run_aes_third(in, out, key, n, &subbyte_htable_third, nt, type, time); //the online phase of the AES-THIRD order scheme	
 		
 	
  

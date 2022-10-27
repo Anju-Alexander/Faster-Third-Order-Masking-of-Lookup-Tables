@@ -117,7 +117,7 @@ void run_present_shares_third(byte *in,byte*out,byte *key,int n,double *time,int
     for(i=0;i<8;i++)
     state[i]=in[i];
 
-    gen_t_forall_present_third(n,type); //Pre-processing table T1 for all rounds
+    gen_t_forall_present_third(n,type); //Pre-processing table T1 for all rounds Offline Phase
     #if TRNG==1
     end1 = SysTick->VAL; // Obtains the stop time
     time[0] = (double) (begin1-end1); // Calculates the time taken
@@ -129,12 +129,13 @@ void run_present_shares_third(byte *in,byte*out,byte *key,int n,double *time,int
         temp = sec + nsec*1e-9;
 
         time[0] = temp*UNIT;
-        #endif // TRNG
+    #endif // TRNG
 
    // printf("Done with pre-processing of tables\n");
     #if TRNG==0
         clock_gettime(CLOCK_REALTIME, &begin);
     #endif // TRNG
+    //Online Phase
     for(int j=0;j<nt;j++)
     {
         for(i=0;i<10;i++)
