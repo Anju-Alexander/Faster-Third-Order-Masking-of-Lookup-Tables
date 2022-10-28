@@ -417,7 +417,7 @@ void aes_share_subkeys_RP(byte in[16],byte out[16],int n)
 			out[i]=decode(stateshare[i],n);
 		}
 }
-void run_aes_share_RP(byte in[16],byte out[16],byte key[16],int n,int nt)
+void run_aes_share_RP(byte in[16],byte out[16],byte key[16],int n,int nt,double *time_b)
 {
 		int i;
 		byte w[176];
@@ -425,8 +425,20 @@ void run_aes_share_RP(byte in[16],byte out[16],byte key[16],int n,int nt)
 	  double time_spent=0.0;
 	  long sec,nsec;
     double temp=0.0;
-   
-   
+    
+    #if TRNG==0
+      struct timespec begin, end;
+
+    #endif
+    #if TRNG==1
+      reset_systick();
+      begin1 = SysTick->VAL; // Obtains the start time
+    #endif // TRNG
+    #if TRNG==0
+      clock_gettime(CLOCK_REALTIME, &begin);
+    #endif // TRNG
+    for(int j=0;j<nt;j++)
+    {
       keyexpansion(key,w);
 
       for(i=0;i<176;i++)
@@ -434,8 +446,22 @@ void run_aes_share_RP(byte in[16],byte out[16],byte key[16],int n,int nt)
         share_rnga(w[i],wshare[i],n);
       }
 
-      
+
       aes_share_subkeys_RP(in,out,n);
+    }
+     
+    #if TRNG==1
+      end1 = SysTick->VAL; // Obtains the stop time
+      time_b[0] = ((double) (begin1-end1))/nt; // Calculates the time taken
+    #endif // TRNG
+    #if TRNG==0
+      clock_gettime(CLOCK_REALTIME, &end);
+      sec = end.tv_sec - begin.tv_sec;
+      nsec = end.tv_nsec - begin.tv_nsec;
+      temp = sec + nsec*1e-9;
+
+      time_b[0] = temp*UNIT/nt;
+    #endif // TRNG 
     
     
     

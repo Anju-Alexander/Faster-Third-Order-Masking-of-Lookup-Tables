@@ -216,29 +216,10 @@ int main()
 		run_aes(in1,out1,key1,nt); //unprotected AES implementation
 		
 		
-		#if TRNG==0
-        	clock_gettime(CLOCK_REALTIME, &begin);
-        #endif // TRNG
-		 #if TRNG==1
-            reset_systick();
-            begin1 = SysTick->VAL; // Obtains the start time
-   		 #endif // TRNG
-		for(int i=0;i<nt;i++)
-		run_aes_share_RP(in2,out2,key2,n,nt);//AES_RP scheme with shares
 		
-		#if TRNG==1
-			end1 = SysTick->VAL; // Obtains the stop time
-			time_spent = ((double) (begin1-end1))/nt; // Calculates the time taken
-    	#endif // TRNG
-
-		#if TRNG==0
-			clock_gettime(CLOCK_REALTIME, &end);
-			sec = end.tv_sec - begin.tv_sec;
-			nsec = end.tv_nsec - begin.tv_nsec;
-			temp = sec + nsec*1e-9;
-
-			time_b[0] = temp*UNIT/nt;
-        #endif // TRNG
+		run_aes_share_RP(in2,out2,key2,n,nt,time_b);//AES_RP scheme with shares
+		
+		
 		if (compare_output(out1, out2, 16)) //verifying the output
 		{
 			printf("Successful execution of AES using RP \n");

@@ -942,10 +942,9 @@ int run_aes_share_bitslice(byte in[16],byte out[16],byte key[16],int nt){
 
 	encode_bskeyn();
 
-  for(i=0;i<nt;i++)
-  {
+ 
     aes_share_subkeys_bitslice(in,out);
-  }
+  
 
   
   return (double) (0.00) ;
@@ -972,7 +971,7 @@ void run_bitslice_shares(byte in[16],byte out[16],byte key[16],int nt,double *ti
         clock_gettime(CLOCK_REALTIME, &begin);
         #endif // TRNG
    for(int i=0;i<nt;i++)
-   run_aes_share_bitslice(in,out,key,nt); //32-bit bitslicing scheme
+   		run_aes_share_bitslice(in,out,key,nt); //32-bit bitslicing scheme
 	
     #if TRNG==1
         end1 = SysTick->VAL; // Obtains the stop time
