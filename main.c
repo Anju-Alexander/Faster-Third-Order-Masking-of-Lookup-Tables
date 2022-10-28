@@ -26,8 +26,8 @@ int main()
 
     int nt = 10; //Number of times to repeat experiments
     int shares = shares_N; // #Input shares. Set the parameter in common.h.
-    int cipher =AES_THIRD; //Cipher can be AES_THIRD, PRESENT_THIRD, AES_RP, BITSLICE or AES_HIGHER_ORDER_INCREASING_SHARES
-    int type=BASIC; //for AES_THIRD type can be BASIC, for PRESENT_THIRD type can be BASIC,  AES_HO_I_S it can be BASIC or LRV
+    int cipher =PRESENT_THIRD; //Cipher can be AES_THIRD, PRESENT_THIRD, AES_RP, BITSLICE or AES_HIGHER_ORDER_INCREASING_SHARES
+    int type=BASIC; //for AES_HO_I_S it can be BASIC or LRV
    
     double time[11]={0,0,0,0,0,0,0,0,0,0,0};// To hold offline and online execution clock cycle count
     double time_b[1]={0};
